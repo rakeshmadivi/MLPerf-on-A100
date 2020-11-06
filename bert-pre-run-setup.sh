@@ -3,13 +3,16 @@
 # -----------------------------------------------------------------------------------------------------------------------------------------
 
 # Download Input Files
+download(){
 curl -k https://storage.googleapis.com/pkanwar-bert/bs64k_32k_ckpt/bert_config.json -o bert_config.json
 curl -k https://storage.googleapis.com/pkanwar-bert/bs64k_32k_ckpt/model.ckpt-28252.data-00000-of-00001 -o model.ckpt-28252.data-00000-of-00001
 curl -k https://storage.googleapis.com/pkanwar-bert/bs64k_32k_ckpt/model.ckpt-28252.index -o model.ckpt-28252.index
 curl -k https://storage.googleapis.com/pkanwar-bert/bs64k_32k_ckpt/model.ckpt-28252.meta -o model.ckpt-28252.meta
 curl -k https://storage.googleapis.com/pkanwar-bert/bs64k_32k_ckpt/vocab.txt -o vocab.txt
+}
 
 # Download and preprocess datasets
+preProcessDataset(){
 cd cleanup_scripts  
 mkdir -p wiki  
 cd wiki  
@@ -19,13 +22,17 @@ cd ..    # back to bert/cleanup_scripts
 git clone https://github.com/attardi/wikiextractor.git  
 python3 wikiextractor/WikiExtractor.py wiki/enwiki-20200101-pages-articles-multistream.xml    # Results are placed in bert/cleanup_scripts/text  
 ./process_wiki.sh '<text/*/wiki_??'  
+}
 
 # Checkpoint conversion
+checkpointConversion(){
 python convert_tf_checkpoint.py --tf_checkpoint /cks/model.ckpt-28252 --bert_config_path /cks/bert_config.json --output_checkpoint model.ckpt-28252.pt
+}
 
 # Generate the BERT input dataset
 # The create_pretraining_data.py script duplicates the input plain text, replaces different sets of words with masks for each duplication, and serializes the output into the TFRecord file format.
 
+createBERTInputDataset(){
 python3 create_pretraining_data.py \
    --input_file=<path to ./results of previous step>/part-XX-of-00500 \
    --output_file=<tfrecord dir>/part-XX-of-00500 \
@@ -37,6 +44,7 @@ python3 create_pretraining_data.py \
    --random_seed=12345 \
    --dupe_factor=10
 # The generated tfrecord has 500 parts, totalling to ~365GB.
+}
 
 # Running the model
 
@@ -50,9 +58,17 @@ python3 create_pretraining_data.py \
 # Alternative launch with nvidia-docker. Replace the configuration script to match the system being used (e.g., config_DGX1.sh, config_DGX2.sh, config_DGXA100.sh).
 
 # docker build --pull -t mlperf-nvidia:language_model .
+launchTest(){
 source config_DGXA100.sh
 CONT=mlperf-nvidia:language_model DATADIR=<path/to/datadir> DATADIR_PHASE2=<path/to/datadir_phase2> EVALDIR=<path/to/evaldir> CHECKPOINTDIR=<path/to/checkpointdir> CHECKPOINTDIR_PHASE1=<path/to/checkpointdir_phase1> ./run_with_docker.sh
+}
 
 # ----------------------------------------------------------------------------------------------------------------------------------------------------
 # All configuration files follow the format config_<SYSTEM_NAME>_<NODES>x<GPUS/NODE>x<BATCH/GPU>x<GRADIENT_ACCUMULATION_STEPS>.sh
 # ----------------------------------------------------------------------------------------------------------------------------------------------------
+
+download
+preProcessDataset
+checkpointConversion
+#createBERTInputDataset
+#launchTest
