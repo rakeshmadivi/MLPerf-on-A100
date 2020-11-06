@@ -17,7 +17,7 @@ sudo systemctl restart docker
 read -p "Do you want to run CUDA Container to test set up?" confirm
 sudo docker run --rm --gpus all nvidia/cuda:11.0-base nvidia-smi
 expected_output='
-# If the above command shows following content. It's working fine.
+# If the above command shows following content. Its working fine.
 +-----------------------------------------------------------------------------+
 | NVIDIA-SMI 450.51.06    Driver Version: 450.51.06    CUDA Version: 11.0     |
 |-------------------------------+----------------------+----------------------+
