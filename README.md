@@ -1,8 +1,7 @@
 # MLPerf-on-A100
 Benchmarking MLPerf on A100
 
-# RECOMMENDATION Benchmark
-# Applies **_Neural Collaborative Filtering (NCF)_** model on **_MovieLens 20 Million (ml-20m)_** dataset for recommendation
+## RECOMMENDATION Benchmark: Applies **_Neural Collaborative Filtering (NCF)_** model on **_MovieLens 20 Million (ml-20m)_** dataset for recommendation
 Instructions followed from: https://github.com/mlperf/training/tree/master/recommendation/pytorch
 
 Step 1: Clone *mlperf/training* from github
